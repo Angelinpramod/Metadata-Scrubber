@@ -6,7 +6,8 @@ print(gps_data)
 
 for tag_id,value in exif_data.items():
   tag_name = ExifTags.TAGS.get(tag_id, tag_id) 
-  gps=ExifTags.GPSTAGS.get(tag_id,tag_id)
   print(f"{tag_name:25} : {value}")
-
+for tag_id,value in gps_data.items():
+  gps=ExifTags.GPSTAGS.get(tag_id,tag_id)
+  print(f"{gps:25}:{value}")
 
