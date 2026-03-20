@@ -9,4 +9,4 @@ for tag_id,value in exif_data.items():
   gps=ExifTags.GPSTAGS.get(tag_id,tag_id)
   print(f"{tag_name:25} : {value}")
 
-print(dir(exif_data))
+
