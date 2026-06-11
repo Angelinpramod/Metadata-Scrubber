@@ -71,7 +71,7 @@ def main():
         cleaned_path = clean_metadata(args.input)
         
         # Verify
-        print("\n🔍 Verifying...")
+        print("\nVerifying...")
         cleaned_image = Image.open(cleaned_path)
         cleaned_exif = cleaned_image.getexif()
         if not cleaned_exif:
