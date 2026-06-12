@@ -1,6 +1,7 @@
 from PIL import Image, ExifTags
 import os
 import argparse
+from pypdf import PdfReader
 
 def analyze_metadata(exif_data, gps_data):
     warnings = []
@@ -83,5 +84,17 @@ def main():
     if not args.analyze and not args.clean :
         print("Please specify --analyze or --clean")
         print("Example: python3 scrubber.py --input photo.jpg --analyze --clean")
+
+def extract_pdf_metadata(input_path):
+    reader = PdfReader(input_path)
+    meta = reader.metadata
+    
+    print("\n PDF METADATA:")
+    print("-" * 40)
+    for key, value in meta.items():
+        print(f"{key:25} : {value}")
+    
+    return meta
+
 if __name__ == "__main__":
     main()
