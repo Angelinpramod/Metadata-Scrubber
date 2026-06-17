@@ -42,29 +42,16 @@ def main():
     
     detect_and_process(args.input, analyze=args.analyze, clean=args.clean)
     
-    def detect_and_process(input_path, analyze=False, clean=False):
-    _, ext = os.path.splitext(input_path)
+def detect_and_process(input_path, analyze=False, clean=False):
+    _, ext = os.path.splitext(input_path)    # ← 4 spaces indent!
     ext = ext.lower()
     
     if ext in [".jpg", ".jpeg", ".png"]:
         if analyze:
-            image = Image.open(input_path)
+            image = Image.open(input_path)   # ← 8 spaces
             exif_data = image.getexif()
             gps_data = exif_data.get_ifd(34853)
-            for tag_id, value in exif_data.items():
-                tag_name = ExifTags.TAGS.get(tag_id, tag_id)
-                print(f"{tag_name:25} : {value}")
-            for tag_id, value in gps_data.items():
-                gps = ExifTags.GPSTAGS.get(tag_id, tag_id)
-                print(f"{gps:25} : {value}")
-            warnings = analyze_metadata(exif_data, gps_data)
-            if warnings:
-                print("\nTHREAT ANALYSIS REPORT")
-                print("-" * 40)
-                for warning in warnings:
-                    print(warning)
-            else:
-                print("No sensitive metadata found!")
+            # ... rest of image logic
         if clean:
             clean_metadata(input_path)
             
@@ -75,7 +62,7 @@ def main():
             clean_pdf_metadata(input_path)
             
     else:
-        print(f"Unsupported file type: {ext}")
+        print(f"⚠️ Unsupported file type: {ext}")
 def extract_pdf_metadata(input_path):
     reader = PdfReader(input_path)
     metadata = reader.metadata
