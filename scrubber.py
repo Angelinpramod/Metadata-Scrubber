@@ -3,6 +3,7 @@ import os
 import argparse
 from pypdf import PdfReader, PdfWriter
 
+
 def analyze_metadata(exif_data, gps_data):
     warnings = []
     if gps_data:
@@ -28,6 +29,22 @@ def clean_metadata(input_path):
     clean.save(output_path)
     print(f"Cleaned file saved as: {output_path}")
     return output_path
+<<<<<<< Updated upstream
+=======
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="MetaScrubber — Metadata Detection & Removal Tool"
+    )
+    parser.add_argument("--input",   required=True, help="Path to input file")
+    parser.add_argument("--analyze", action="store_true", help="Analyze metadata")
+    parser.add_argument("--clean",   action="store_true", help="Clean metadata")
+    parser.add_argument("--output",  help="Custom output path (optional)")
+    
+    args = parser.parse_args()
+    
+    detect_and_process(args.input, analyze=args.analyze, clean=args.clean)
+>>>>>>> Stashed changes
     
 def detect_and_process(input_path, analyze=False, clean=False):
     _, ext = os.path.splitext(input_path)   
