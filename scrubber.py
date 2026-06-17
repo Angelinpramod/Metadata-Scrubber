@@ -1,7 +1,7 @@
 from PIL import Image, ExifTags
 import os
 import argparse
-from pypdf import PdfReader
+from pypdf import PdfReader, PdfWriter
 
 def analyze_metadata(exif_data, gps_data):
     warnings = []
@@ -33,14 +33,14 @@ def main():
     parser = argparse.ArgumentParser(
         description="🔍 MetaScrubber — Metadata Detection & Removal Tool"
     )
-    
-    # Add arguments
     parser.add_argument("--input",   required=True, help="Path to input file")
     parser.add_argument("--analyze", action="store_true", help="Analyze metadata")
     parser.add_argument("--clean",   action="store_true", help="Clean metadata")
     parser.add_argument("--output",  help="Custom output path (optional)")
     
     args = parser.parse_args()
+    
+    detect_and_process(args.input, analyze=args.analyze, clean=args.clean)
     
     # Step 1 - Open image using args
     image = Image.open(args.input)
@@ -87,14 +87,46 @@ def main():
 
 def extract_pdf_metadata(input_path):
     reader = PdfReader(input_path)
-    meta = reader.metadata
+    metadata = reader.metadata
     
     print("\n PDF METADATA:")
     print("-" * 40)
-    for key, value in meta.items():
+    for key, value in metadata.items():
         print(f"{key:25} : {value}")
     
-    return meta
+    warnings = []
+    sensitive = ["/Author", "/Creator", "/Producer"]
+    
+    for field in sensitive:
+        if sensitive in metadata:   
+            warnings.append(f"Sensitive field found: {field} = {metadata[field]}")
+    
+    if warnings:
+        print("\n PDF THREAT REPORT ")
+        print("-" * 40)
+        for w in warnings:
+            print(w)
+    
+    return metadata
 
+def clean_pdf_metadata(input_path):
+    reader = PdfReader(input_path)
+    writer = PdfWriter()
+    
+ 
+    for page in reader.pages:
+        writer.add_page(page)
+        
+    writer.add_metadata({})
+    
+    name, ext = os.path.splitext(input_path)
+    output_path = f"{name}_cleaned{ext}"
+    
+    with open(output_path, "wb") as f:
+        writer.write(f)
+    
+    print(f"Cleaned PDF saved as: {output_path}")
+    return output_path
+    
 if __name__ == "__main__":
     main()
