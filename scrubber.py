@@ -28,30 +28,31 @@ def clean_metadata(input_path):
     clean.save(output_path)
     print(f"Cleaned file saved as: {output_path}")
     return output_path
-
-def main():
-    parser = argparse.ArgumentParser(
-        description="🔍 MetaScrubber — Metadata Detection & Removal Tool"
-    )
-    parser.add_argument("--input",   required=True, help="Path to input file")
-    parser.add_argument("--analyze", action="store_true", help="Analyze metadata")
-    parser.add_argument("--clean",   action="store_true", help="Clean metadata")
-    parser.add_argument("--output",  help="Custom output path (optional)")
-    
-    args = parser.parse_args()
-    
-    detect_and_process(args.input, analyze=args.analyze, clean=args.clean)
     
 def detect_and_process(input_path, analyze=False, clean=False):
-    _, ext = os.path.splitext(input_path)    # ← 4 spaces indent!
+    _, ext = os.path.splitext(input_path)   
     ext = ext.lower()
     
     if ext in [".jpg", ".jpeg", ".png"]:
         if analyze:
-            image = Image.open(input_path)   # ← 8 spaces
+            image = Image.open(input_path)   
             exif_data = image.getexif()
             gps_data = exif_data.get_ifd(34853)
-            # ... rest of image logic
+            for tag_id, value in exif_data.items():
+                tag_name = ExifTags.TAGS.get(tag_id, tag_id)
+                print(f"{tag_name:25} : {value}")
+            for tag_id, value in gps_data.items():
+                gps = ExifTags.GPSTAGS.get(tag_id, tag_id)
+                print(f"{gps:25} : {value}")
+            warnings = analyze_metadata(exif_data, gps_data)
+            if warnings:
+                print("\nTHREAT ANALYSIS REPORT")
+                print("-" * 40)
+                for warning in warnings:
+                    print(warning)
+            else:
+                print("No sensitive metadata found!")
+            
         if clean:
             clean_metadata(input_path)
             
@@ -62,7 +63,7 @@ def detect_and_process(input_path, analyze=False, clean=False):
             clean_pdf_metadata(input_path)
             
     else:
-        print(f"⚠️ Unsupported file type: {ext}")
+        print(f"Unsupported file type: {ext}")
 def extract_pdf_metadata(input_path):
     reader = PdfReader(input_path)
     metadata = reader.metadata
@@ -105,6 +106,20 @@ def clean_pdf_metadata(input_path):
     
     print(f"Cleaned PDF saved as: {output_path}")
     return output_path
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="🔍 MetaScrubber — Metadata Detection & Removal Tool"
+    )
+    parser.add_argument("--input",   required=True, help="Path to input file")
+    parser.add_argument("--analyze", action="store_true", help="Analyze metadata")
+    parser.add_argument("--clean",   action="store_true", help="Clean metadata")
+    parser.add_argument("--output",  help="Custom output path (optional)")
+    
+    args = parser.parse_args()
+    
+    detect_and_process(args.input, analyze=args.analyze, clean=args.clean)
+    
     
 if __name__ == "__main__":
     main()
