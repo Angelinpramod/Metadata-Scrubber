@@ -42,49 +42,40 @@ def main():
     
     detect_and_process(args.input, analyze=args.analyze, clean=args.clean)
     
-    # Step 1 - Open image using args
-    image = Image.open(args.input)
-    exif_data = image.getexif()
-    gps_data = exif_data.get_ifd(34853)
+    def detect_and_process(input_path, analyze=False, clean=False):
+    _, ext = os.path.splitext(input_path)
+    ext = ext.lower()
     
-    # Step 2 - If --analyze flag passed
-    if args.analyze:
-        print("\n EXTRACTING METADATA...")
-        for tag_id, value in exif_data.items():
-            tag_name = ExifTags.TAGS.get(tag_id, tag_id)
-            print(f"{tag_name:25} : {value}")
-        for tag_id, value in gps_data.items():
-            gps = ExifTags.GPSTAGS.get(tag_id, tag_id)
-            print(f"{gps:25} : {value}")
-        
-        warnings = analyze_metadata(exif_data, gps_data)
-        if warnings:
-            print("\nTHREAT ANALYSIS REPORT")
-            print("-" * 40)
-            for warning in warnings:
-                print(warning)
-        else:
-            print("No sensitive metadata found!")
-    
-    # Step 3 - If --clean flag passed
-    if args.clean:
-        print("\n Starting sanitization...")
-        cleaned_path = clean_metadata(args.input)
-        
-        # Verify
-        print("\nVerifying...")
-        cleaned_image = Image.open(cleaned_path)
-        cleaned_exif = cleaned_image.getexif()
-        if not cleaned_exif:
-            print("VERIFICATION PASSED — Zero metadata found!")
-        else:
-            print(f"WARNING — {len(cleaned_exif)} fields still present!")
-    
-    # Step 4 - If neither flag passed
-    if not args.analyze and not args.clean :
-        print("Please specify --analyze or --clean")
-        print("Example: python3 scrubber.py --input photo.jpg --analyze --clean")
-
+    if ext in [".jpg", ".jpeg", ".png"]:
+        if analyze:
+            image = Image.open(input_path)
+            exif_data = image.getexif()
+            gps_data = exif_data.get_ifd(34853)
+            for tag_id, value in exif_data.items():
+                tag_name = ExifTags.TAGS.get(tag_id, tag_id)
+                print(f"{tag_name:25} : {value}")
+            for tag_id, value in gps_data.items():
+                gps = ExifTags.GPSTAGS.get(tag_id, tag_id)
+                print(f"{gps:25} : {value}")
+            warnings = analyze_metadata(exif_data, gps_data)
+            if warnings:
+                print("\nTHREAT ANALYSIS REPORT")
+                print("-" * 40)
+                for warning in warnings:
+                    print(warning)
+            else:
+                print("No sensitive metadata found!")
+        if clean:
+            clean_metadata(input_path)
+            
+    elif ext == ".pdf":
+        if analyze:
+            extract_pdf_metadata(input_path)
+        if clean:
+            clean_pdf_metadata(input_path)
+            
+    else:
+        print(f"Unsupported file type: {ext}")
 def extract_pdf_metadata(input_path):
     reader = PdfReader(input_path)
     metadata = reader.metadata
