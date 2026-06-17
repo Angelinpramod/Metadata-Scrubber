@@ -77,7 +77,7 @@ def extract_pdf_metadata(input_path):
     sensitive = ["/Author", "/Creator", "/Producer"]
     
     for field in sensitive:
-        if sensitive in metadata:   
+        if field in metadata:   
             warnings.append(f"Sensitive field found: {field} = {metadata[field]}")
     
     if warnings:
